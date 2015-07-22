@@ -759,12 +759,12 @@ class Service(object):
                 return True
         return False
 
-    def pull(self, insecure_registry=False):
+    def pull(self, insecure_registry=False, default_registry=None):
         if 'image' not in self.options:
             return
 
         repo, tag = parse_repository_tag(self.options['image'])
-        # TODO inject here the private registry
+        repo = repo if default_registry is None else default_registry
         tag = tag or 'latest'
         log.info('Pulling %s (%s:%s)...' % (self.name, repo, tag))
         output = self.client.pull(

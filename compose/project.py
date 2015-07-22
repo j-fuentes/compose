@@ -302,9 +302,9 @@ class Project(object):
 
         return plans
 
-    def pull(self, service_names=None, insecure_registry=False):
+    def pull(self, service_names=None, insecure_registry=False, default_registry=None):
         for service in self.get_services(service_names, include_deps=True):
-            service.pull(insecure_registry=insecure_registry)
+            service.pull(insecure_registry=insecure_registry, default_registry=default_registry)
 
     def containers(self, service_names=None, stopped=False, one_off=False):
         if service_names:
