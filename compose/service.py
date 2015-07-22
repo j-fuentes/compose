@@ -764,6 +764,7 @@ class Service(object):
             return
 
         repo, tag = parse_repository_tag(self.options['image'])
+        # TODO inject here the private registry
         tag = tag or 'latest'
         log.info('Pulling %s (%s:%s)...' % (self.name, repo, tag))
         output = self.client.pull(
