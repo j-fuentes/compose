@@ -759,7 +759,7 @@ class Service(object):
                 return True
         return False
 
-    def pull(self, insecure_registry=False, default_registry=None):
+    def pull(self, insecure_registry=False, default_registry=None, out_stream=sys.stdout):
         if 'image' not in self.options:
             return
 
@@ -772,7 +772,7 @@ class Service(object):
             tag=tag,
             stream=True,
             insecure_registry=insecure_registry)
-        stream_output(output, sys.stdout)
+        stream_output(output, out_stream)
 
 
 # Names
