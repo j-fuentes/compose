@@ -764,7 +764,8 @@ class Service(object):
             return
 
         repo, tag = parse_repository_tag(self.options['image'])
-        repo = repo if default_registry is None else default_registry
+        if default_registry:
+            repo = set_registry_in_repo(repo, default_registry)
         tag = tag or 'latest'
         log.info('Pulling %s (%s:%s)...' % (self.name, repo, tag))
         output = self.client.pull(
@@ -795,6 +796,22 @@ def parse_repository_tag(s):
     if "/" in tag:
         return s, ""
     return repo, tag
+
+def set_registry_in_repo(repo, registry):
+    if registry:
+        newrepo = ""
+        slices = repo.split("/", 2)
+        if len(slices) is 1:
+            newrepo = registry+"/"+slices[0]
+        elif len(slices) is 2:
+            newrepo = registry+"/"+slices[0]+"/"+slices[1]
+        elif len(slices) is 3:
+            newrepo = registry+"/"+slices[1]+"/"+slices[2]
+        else:
+            newrepo = repo
+        return newrepo
+    else:
+        return repo
 
 
 # Volumes
