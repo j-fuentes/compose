@@ -774,6 +774,8 @@ class Service(object):
             stream=True,
             insecure_registry=insecure_registry)
         stream_output(output, out_stream)
+        # retag
+        self.client.tag(image=repo, repository=remove_registry_in_repo(repo), force=True)
 
 
 # Names
@@ -812,6 +814,21 @@ def set_registry_in_repo(repo, registry):
         return newrepo
     else:
         return repo
+
+def remove_registry_in_repo(repo):
+    newrepo = ""
+    slices = repo.split("/", 2)
+    if len(slices) is 1:
+        newrepo = slices[0]
+    elif len(slices) is 2:
+        newrepo = slices[0]+"/"+slices[1]
+    elif len(slices) is 3:
+        newrepo = slices[1]+"/"+slices[2]
+    else:
+        newrepo = repo
+    return newrepo
+
+
 
 
 # Volumes
