@@ -1,10 +1,13 @@
-from __future__ import unicode_literals
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
-import six
 from functools import reduce
 
-from .const import LABEL_CONTAINER_NUMBER, LABEL_SERVICE
+import six
+
+from .const import LABEL_CONTAINER_NUMBER
+from .const import LABEL_PROJECT
+from .const import LABEL_SERVICE
 
 
 class Container(object):
@@ -16,16 +19,21 @@ class Container(object):
         self.client = client
         self.dictionary = dictionary
         self.has_been_inspected = has_been_inspected
+        self.log_stream = None
 
     @classmethod
     def from_ps(cls, client, dictionary, **kwargs):
         """
         Construct a container object from the output of GET /containers/json.
         """
+        name = get_container_name(dictionary)
+        if name is None:
+            return None
+
         new_dictionary = {
             'Id': dictionary['Id'],
             'Image': dictionary['Image'],
-            'Name': '/' + get_container_name(dictionary),
+            'Name': '/' + name,
         }
         return cls(client, new_dictionary, **kwargs)
 
@@ -59,8 +67,17 @@ class Container(object):
         return self.dictionary['Name'][1:]
 
     @property
+    def service(self):
+        return self.labels.get(LABEL_SERVICE)
+
+    @property
     def name_without_project(self):
-        return '{0}_{1}'.format(self.labels.get(LABEL_SERVICE), self.number)
+        project = self.labels.get(LABEL_PROJECT)
+
+        if self.name.startswith('{0}_{1}'.format(project, self.service)):
+            return '{0}_{1}'.format(self.service, self.number)
+        else:
+            return self.name
 
     @property
     def number(self):
@@ -96,6 +113,8 @@ class Container(object):
 
     @property
     def human_readable_state(self):
+        if self.is_paused:
+            return 'Paused'
         if self.is_running:
             return 'Ghost' if self.get('State.Ghost') else 'Up'
         else:
@@ -114,6 +133,26 @@ class Container(object):
     @property
     def is_running(self):
         return self.get('State.Running')
+
+    @property
+    def is_paused(self):
+        return self.get('State.Paused')
+
+    @property
+    def log_driver(self):
+        return self.get('HostConfig.LogConfig.Type')
+
+    @property
+    def has_api_logs(self):
+        log_type = self.log_driver
+        return not log_type or log_type != 'none'
+
+    def attach_log_stream(self):
+        """A log stream can only be attached if the container uses a json-file
+        log driver.
+        """
+        if self.has_api_logs:
+            self.log_stream = self.attach(stdout=True, stderr=True, stream=True)
 
     def get(self, key):
         """Return a value from the container or None if the value is not set.
@@ -138,6 +177,12 @@ class Container(object):
     def stop(self, **options):
         return self.client.stop(self.id, **options)
 
+    def pause(self, **options):
+        return self.client.pause(self.id, **options)
+
+    def unpause(self, **options):
+        return self.client.unpause(self.id, **options)
+
     def kill(self, **options):
         return self.client.kill(self.id, **options)
 
@@ -146,6 +191,15 @@ class Container(object):
 
     def remove(self, **options):
         return self.client.remove_container(self.id, **options)
+
+    def rename_to_tmp_name(self):
+        """Rename the container to a hopefully unique temporary container name
+        by prepending the short id.
+        """
+        self.client.rename(
+            self.id,
+            '%s_%s' % (self.short_id, self.name)
+        )
 
     def inspect_if_not_inspected(self):
         if not self.has_been_inspected:
@@ -174,9 +228,6 @@ class Container(object):
 
     def attach(self, *args, **kwargs):
         return self.client.attach(self.id, *args, **kwargs)
-
-    def attach_socket(self, **kwargs):
-        return self.client.attach_socket(self.id, **kwargs)
 
     def __repr__(self):
         return '<Container: %s (%s)>' % (self.name, self.id[:6])

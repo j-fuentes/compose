@@ -4,6 +4,7 @@ title = "up"
 description = "Builds, (re)creates, starts, and attaches to containers for a service."
 keywords = ["fig, composition, compose, docker, orchestration, cli,  up"]
 [menu.main]
+identifier="up.compose"
 parent = "smn_compose_cli"
 +++
 <![end-metadata]-->
@@ -14,8 +15,6 @@ parent = "smn_compose_cli"
 Usage: up [options] [SERVICE...]
 
 Options:
---allow-insecure-ssl   Allow insecure connections to the docker
-                       registry
 -d                     Detached mode: Run containers in the background,
                        print new container names.
 --no-color             Produce monochrome output.

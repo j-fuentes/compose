@@ -12,48 +12,99 @@ weight=4
 
 # Install Docker Compose
 
-To install Compose, you'll need to install Docker first. You'll then install
-Compose with a `curl` command. 
+You can run Compose on OS X and 64-bit Linux.  It is currently not supported on
+the Windows operating system. To install Compose, you'll need to install Docker
+first.
 
-## Install Docker
+To install Compose, do the following:
 
-First, install Docker version 1.6 or greater:
+1. Install Docker Engine version 1.7.1 or greater:
 
-- [Instructions for Mac OS X](http://docs.docker.com/installation/mac/)
-- [Instructions for Ubuntu](http://docs.docker.com/installation/ubuntulinux/)
-- [Instructions for other systems](http://docs.docker.com/installation/)
+     * <a href="https://docs.docker.com/installation/mac/" target="_blank">Mac OS X installation</a> (Toolbox installation includes both Engine and Compose)
 
-## Install Compose
+     * <a href="https://docs.docker.com/installation/ubuntulinux/" target="_blank">Ubuntu installation</a>
 
-To install Compose, run the following commands:
+     * <a href="https://docs.docker.com/installation/" target="_blank">other system installations</a>
 
-    curl -L https://github.com/docker/compose/releases/download/1.2.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+2. Mac OS X users are done installing. Others should continue to the next step.
 
-> Note: If you get a "Permission denied" error, your `/usr/local/bin` directory probably isn't writable and you'll need to install Compose as the superuser. Run `sudo -i`, then the two commands above, then `exit`.
+3. Go to the <a href="https://github.com/docker/compose/releases" target="_blank">Compose repository release page on GitHub</a>.
 
-Optionally, you can also install [command completion](completion.md) for the
-bash and zsh shell.
+4. Follow the instructions from the release page and run the `curl` command,
+which the release page specifies, in your terminal.
 
-Compose is available for OS X and 64-bit Linux. If you're on another platform,
-Compose can also be installed as a Python package:
+     > Note: If you get a "Permission denied" error, your `/usr/local/bin` directory
+     probably isn't writable and you'll need to install Compose as the superuser. Run
+     `sudo -i`, then the two commands below, then `exit`.
 
-    $ sudo pip install -U docker-compose
+     The following is an example command illustrating the format:
 
-No further steps are required; Compose should now be successfully installed.
-You can test the installation by running `docker-compose --version`.
+        curl -L https://github.com/docker/compose/releases/download/VERSION_NUM/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
 
-### Upgrading
+     If you have problems installing with `curl`, see
+     [Alternative Install Options](#alternative-install-options).
 
-If you're coming from Compose 1.2 or earlier, you'll need to remove or migrate your existing containers after upgrading Compose. This is because, as of version 1.3, Compose uses Docker labels to keep track of containers, and so they need to be recreated with labels added.
+5. Apply executable permissions to the binary:
 
-If Compose detects containers that were created without labels, it will refuse to run so that you don't end up with two sets of them. If you want to keep using your existing containers (for example, because they have data volumes you want to preserve) you can migrate them with the following command:
+        $ chmod +x /usr/local/bin/docker-compose
 
-    docker-compose migrate-to-labels
+6.  Optionally, install [command completion](completion.md) for the
+`bash` and `zsh` shell.
 
-Alternatively, if you're not worried about keeping them, you can remove them - Compose will just create new ones.
+7. Test the installation.
 
-    docker rm -f myapp_web_1 myapp_db_1 ...
+        $ docker-compose --version
+        docker-compose version: 1.5.0
+
+
+## Alternative install options
+
+### Install using pip
+
+Compose can be installed from [pypi](https://pypi.python.org/pypi/docker-compose)
+using `pip`.  If you install using `pip` it is highly recommended that you use a
+[virtualenv](https://virtualenv.pypa.io/en/latest/) because many operating systems
+have python system packages that conflict with docker-compose dependencies. See
+the [virtualenv tutorial](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
+to get started.
+
+    $ pip install docker-compose
+
+
+### Install as a container
+
+Compose can also be run inside a container, from a small bash script wrapper.
+To install compose as a container run:
+
+    $ curl -L https://github.com/docker/compose/releases/download/1.5.0/run.sh > /usr/local/bin/docker-compose
+    $ chmod +x /usr/local/bin/docker-compose
+
+## Master builds
+
+If you're interested in trying out a pre-release build you can download a
+binary from https://dl.bintray.com/docker-compose/master/. Pre-release
+builds allow you to try out new features before they are released, but may
+be less stable.
+
+
+## Upgrading
+
+If you're upgrading from Compose 1.2 or earlier, you'll need to remove or migrate
+your existing containers after upgrading Compose. This is because, as of version
+1.3, Compose uses Docker labels to keep track of containers, and so they need to
+be recreated with labels added.
+
+If Compose detects containers that were created without labels, it will refuse
+to run so that you don't end up with two sets of them. If you want to keep using
+your existing containers (for example, because they have data volumes you want
+to preserve) you can migrate them with the following command:
+
+    $ docker-compose migrate-to-labels
+
+Alternatively, if you're not worried about keeping them, you can remove them.
+Compose will just create new ones.
+
+    $ docker rm -f -v myapp_web_1 myapp_db_1 ...
 
 
 ## Uninstallation
@@ -66,17 +117,19 @@ To uninstall Docker Compose if you installed using `curl`:
 To uninstall Docker Compose if you installed using `pip`:
 
     $ pip uninstall docker-compose
-    
-> Note: If you get a "Permission denied" error using either of the above methods, you probably do not have the proper permissions to remove `docker-compose`.  To force the removal, prepend `sudo` to either of the above commands and run again.
+
+>**Note**: If you get a "Permission denied" error using either of the above
+>methods, you probably do not have the proper permissions to remove
+>`docker-compose`.  To force the removal, prepend `sudo` to either of the above
+>commands and run again.
 
 
-## Compose documentation
+## Where to go next
 
 - [User guide](/)
+- [Getting Started](gettingstarted.md)
 - [Get started with Django](django.md)
 - [Get started with Rails](rails.md)
-- [Get started with Wordpress](wordpress.md)
-- [Command line reference](cli.md)
-- [Yaml file reference](yml.md)
-- [Compose environment variables](env.md)
-- [Compose command line completion](completion.md)
+- [Get started with WordPress](wordpress.md)
+- [Command line reference](./reference/index.md)
+- [Compose file reference](compose-file.md)
